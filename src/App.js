@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import SearchComponent from './SearchComponent';
+import FacebookClient from "./facebookPosts/FacebookClient";
 
 class App extends Component {
 
@@ -16,7 +16,7 @@ class App extends Component {
             <div className="App">
                 <div className="App-intro">
                     <div>
-                        <SearchComponent />
+                        <FacebookClient />
                     </div>
                 </div>
             </div>
