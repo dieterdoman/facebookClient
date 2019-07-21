@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-
+import StringUtil from './utils/StringUtil'
 
 export default class FacebookPosts extends Component {
     constructor(props) {
@@ -7,7 +7,7 @@ export default class FacebookPosts extends Component {
         let value = "";
         if (props.search)
         {
-            value = "*" + props.search + "*";
+            value = "*" + StringUtil.escapeRegExp(props.search) + "*";
         }
         this.state = {
             error: null,
@@ -29,38 +29,8 @@ export default class FacebookPosts extends Component {
         );
     }
 
-    escapeRegExp(str) {
-        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    convertWildcardStringToRegExp(expression) {
-        const terms = expression.split('*');
-
-        let trailingWildcard = false;
-
-        let expr = '';
-        for (let i = 0; i < terms.length; i++) {
-            if (terms[i]) {
-                if (i > 0 && terms[i - 1]) {
-                    expr += '.*';
-                }
-                trailingWildcard = false;
-                expr += this.escapeRegExp(terms[i]);
-            } else {
-                trailingWildcard = true;
-                expr += '.*';
-            }
-        }
-
-        if (!trailingWildcard) {
-            expr += '.*';
-        }
-
-        return new RegExp('^' + expr + '$', 'i');
-    }
-
     filterArray(array, expression) {
-        const regex = this.convertWildcardStringToRegExp(expression);
+        const regex = StringUtil.convertWildcardStringToRegExp(expression);
         return array.filter(function(item) {
             return regex.test(item);
         });
