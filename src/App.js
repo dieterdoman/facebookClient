@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import FacebookClient from "./facebookPosts/FacebookClient";
+import FacebookClient from "./facebookClient/FacebookClient";
 
 class App extends Component {
 

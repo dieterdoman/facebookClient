@@ -3,7 +3,11 @@ import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import Button from "react-bootstrap/Button";
 import ReactDOM from 'react-dom';
-import SearchComponent from "./SearchComponent";
+import SearchComponent from "../searchComponent/SearchComponent";
+
+const limit = 10;
+const facebookVersion = 'v2.11';
+const appId = '3214880471877150';
 
 export default class FacebookClient extends Component {
     constructor(props) {
@@ -13,31 +17,31 @@ export default class FacebookClient extends Component {
         };
         this.checkLoginState = this.checkLoginState.bind(this);
         this.handleClick = this.handleClick.bind(this);
-        this.testAPI = this.testAPI.bind(this);
+        this.getPersonsFacebookFeed = this.getPersonsFacebookFeed.bind(this);
         this.statusChangeCallback = this.statusChangeCallback.bind(this);
     }
 
     componentDidMount() {
         window.fbAsyncInit = function() {
             FB.init({
-                appId      : '3214880471877150',
+                appId      : appId,
                 cookie     : true,
                 xfbml      : true,
-                version    : 'v2.11'
+                version    : facebookVersion
             });
             FB.AppEvents.logPageView();
             FB.Event.subscribe('auth.statusChange', function(response) {
                 if (response.authResponse) {
                     this.checkLoginState();
-                } else {
-                    console.log('---->User cancelled login or did not fully authorize.');
                 }
             }.bind(this));
         }.bind(this);
+        FacebookClient.loadFacebookSDKAsynchronously();
+    }
 
-        // Load the SDK asynchronously
+    static loadFacebookSDKAsynchronously(){
         (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
+            let js, fjs = d.getElementsByTagName(s)[0];
             if (d.getElementById(id)) return;
             js = d.createElement(s); js.id = id;
             js.src = '//connect.facebook.net/en_US/sdk.js';
@@ -45,45 +49,36 @@ export default class FacebookClient extends Component {
         }(document, 'script', 'facebook-jssdk'));
     }
 
-    // Here we run a very simple test of the Graph API after login is
-    // successful.  See statusChangeCallback() for when this call is made.
-    testAPI() {
-        const that = this;
-        console.log('Welcome! Fetching your information.... ');
+    getPersonsFacebookFeed() {
         FB.api(
             "/me/feed",
-            {limit: 10},
-            function (response) {
-                if (that.state.items.length === 0)
-                {
-                    that.setState({items: response.data.filter(n => n.message)});
-                }
-                const items = that.state.items;
-                const elements = <SearchComponent data={items.map(item => item.message)} />;
-                ReactDOM.render(elements, document.getElementById('status'));
-            }
+            {limit: limit},
+            (response) => this.facebookFeedResponseHandler(response)
         );
     }
 
-    // This is called with the results from from FB.getLoginStatus().
+    facebookFeedResponseHandler(response) {
+        if (this.state.items.length === 0)
+        {
+            this.setState({items: response.data.filter(n => n.message)});
+        }
+        const items = this.state.items;
+        const elements = <SearchComponent data={items.map(item => item.message)} />;
+        ReactDOM.render(elements, document.getElementById('status'));
+    }
+
     statusChangeCallback(response) {
         if (response.status === 'connected') {
-            // Logged into your app and Facebook.
-            this.testAPI();
+            this.getPersonsFacebookFeed();
         } else if (response.status === 'not_authorized') {
-            // The person is logged into Facebook, but not your app.
             document.getElementById('status').innerHTML = 'Please log into this app.';
         } else {
-            // The person is not logged into Facebook, so we're not sure if
-            // they are logged into this app or not.
             document.getElementById('status').innerHTML = 'Please log into Facebook.';
         }
     }
 
     checkLoginState() {
-        FB.getLoginStatus(function(response) {
-            this.statusChangeCallback(response);
-        }.bind(this));
+        FB.getLoginStatus((response) => this.statusChangeCallback(response));
     }
 
     handleClick() {
@@ -95,7 +90,7 @@ export default class FacebookClient extends Component {
             <main>
                 <Container fluid>
                     <h1>
-                        Facebook Login
+                        Facebook Client Login
                     </h1>
                 </Container>
                 <Container>

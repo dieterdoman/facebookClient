@@ -1,18 +1,6 @@
 import React, {Component} from 'react';
 import ArrayUtils from '../utils/ArrayUtils';
-
-const RenderPostItems = (props) => {
-    const data = props.data;
-    return (
-        <ul>
-            {data && data.map(item => (
-                <li>
-                    {item}
-                </li>
-            ))}
-        </ul>
-    );
-};
+import RenderPostItems from '../renderPostItems/RenderPostItems'
 
 class SearchComponent extends Component {
 
